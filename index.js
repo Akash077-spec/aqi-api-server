@@ -1,5 +1,3 @@
-// in api_server/index.js
-
 import express from 'express';
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
@@ -11,7 +9,7 @@ const app = express();
 const port = 3000;
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-// Middleware to enable CORS (Cross-Origin Resource Sharing)
+// Middleware to enable CORS
 app.use(cors());
 
 // --- API ENDPOINTS ---
@@ -30,7 +28,26 @@ app.get('/api/aqi/latest', async (req, res) => {
 });
 
 // Endpoint 2: Get historical data for a specific station
-// Example: /api/aqi/historical/10705
+app.get('/api/aqi/historical/:stationId', async (req, res) => {
+  const { stationId } = req.params;
+  console.log(`Request received for historical data for station: ${stationId}`);
+  try {
+    const { data, error } = await supabase
+      .from('aqi_readings')
+      .select('created_at, aqi, pm25')
+      .eq('station_id', stationId)
+      .order('created_at', { ascending: false })
+      .limit(168); // ~ Last 7 days of hourly data
+    
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error("Error fetching historical AQI:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Endpoint 3: Get the 24-hour forecast for a specific station
 app.get('/api/aqi/forecast/:stationId', async (req, res) => {
   const { stationId } = req.params;
   console.log(`Request received for forecast for station: ${stationId}`);
@@ -40,7 +57,7 @@ app.get('/api/aqi/forecast/:stationId', async (req, res) => {
       .select('forecasted_at, predicted_aqi')
       .eq('station_id', stationId)
       .order('forecasted_at', { ascending: true });
-
+    
     if (error) throw error;
     res.json(data);
   } catch (error) {
@@ -48,6 +65,7 @@ app.get('/api/aqi/forecast/:stationId', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 // Start the server
 app.listen(port, () => {

@@ -5,14 +5,14 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-     "start": "node index.js",
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "API server for AQI project",
   "dependencies": {
+    "@googlemaps/google-maps-services-js": "^3.4.2",
     "@supabase/supabase-js": "^2.55.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",

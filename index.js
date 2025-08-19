@@ -65,6 +65,22 @@ app.get('/api/aqi/forecast/:stationId', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+// Endpoint 4: Get all satellite data points for the heatmap
+app.get('/api/satellite/latest', async (req, res) => {
+  console.log("Request received for /api/satellite/latest");
+  try {
+    // Select all rows from the new table
+    const { data, error } = await supabase
+      .from('satellite_readings')
+      .select('latitude, longitude, pollutant_value');
+
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error("Error fetching satellite data:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
 
 // Start the server
